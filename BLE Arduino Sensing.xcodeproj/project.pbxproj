@@ -148,7 +148,7 @@
 				ORGANIZATIONNAME = "Red Bear Company Limited";
 				TargetAttributes = {
 					2941610015DB55E5003210B3 = {
-						DevelopmentTeam = F69WJ27LN4;
+						DevelopmentTeam = 6B83F7C8RZ;
 					};
 				};
 			};
@@ -295,7 +295,7 @@
 		2941612015DB55E5003210B3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				DEVELOPMENT_TEAM = F69WJ27LN4;
+				DEVELOPMENT_TEAM = 6B83F7C8RZ;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/..\"",
@@ -315,7 +315,7 @@
 		2941612115DB55E5003210B3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				DEVELOPMENT_TEAM = F69WJ27LN4;
+				DEVELOPMENT_TEAM = 6B83F7C8RZ;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/..\"",
