@@ -32,7 +32,7 @@
 }
 -(void) bleDidReceiveData:(unsigned char *) data length:(int) length
 {
-    NSLog(@"BLE ReceivedData");
+//    NSLog(@"BLE ReceivedData");
     
     NSData* myData = [NSData dataWithBytes:data length:length];
     

@@ -10,7 +10,6 @@
 #import "BLE.h"
 #import "AppDelegate.h"
 
-//CHANGE 2a: No longer need to be a delegate
 @interface ViewController : UIViewController {
     
 }
@@ -19,7 +18,6 @@
 @property (weak, nonatomic) IBOutlet UITextField *textField;
 @property (weak, nonatomic) IBOutlet UILabel *label;
 @property (weak, nonatomic) IBOutlet UILabel *labelRSSI;
-//@property (weak, nonatomic) IBOutlet UIButton *buttonConnect;
-@property (weak, nonatomic) BLE *bleShield; //CHANGE 2.b: make bleShield a property, will need to add "self" in different places
+@property (weak, nonatomic) BLE *bleShield;
 
 @end
