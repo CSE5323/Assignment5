@@ -11,6 +11,12 @@
 
 @interface ViewController ()
 @property (weak, nonatomic) IBOutlet UILabel *deviceLabel;
+@property (weak, nonatomic) IBOutlet UISwitch *buttonSwitch;
+@property (weak, nonatomic) IBOutlet UILabel *potLabel;
+@property (nonatomic) CGFloat hue;
+@property (nonatomic) CGFloat saturation;
+@property (nonatomic) CGFloat brightness;
+@property (nonatomic) int potValue;
 
 @end
 
@@ -29,8 +35,23 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onBLEDidDisconnect:) name:kBleDisconnectNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onBLEDidUpdateRSSI:) name:kBleRSSINotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector (onBLEDidReceiveData:) name:kBleReceivedDataNotification object:nil];
+    
+    self.potValue = 1023;
+    [self setRandomBackground];
 }
 
+-(void) setRandomBackground{
+    self.hue = ( arc4random() % 256 / 256.0 );  //  0.0 to 1.0
+    self.saturation = ( arc4random() % 128 / 256.0 ) + 0.5;  //  0.5 to 1.0, away from white
+    self.brightness = ( arc4random() % 128 / 256.0 ) + 0.5;  //  0.5 to 1.0, away from black
+    [self setColor];
+}
+-(void) setColor{
+    CGFloat alpha = (float)self.potValue / 1023;
+    UIColor* newColor = [UIColor colorWithHue:self.hue saturation:self.saturation brightness:self.brightness alpha:alpha];
+    
+    [self.view setBackgroundColor:newColor];
+}
 //setup auto rotation in code
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
@@ -61,19 +82,35 @@ NSTimer *rssiTimer;
     NSData* d = [[notification userInfo] objectForKey:@"data"];
     
     const char* fileBytes = (const char*)[d bytes];
-    NSUInteger length = [d length];
-    NSUInteger index;
     
-    for (index = 0; index<length; index++)
-    {
-        char aByte = fileBytes[index];
-        NSLog(@"Byte at index %lu: %c", (unsigned long)index, aByte);
-        //Do something with each byte
+    switch(fileBytes[0]){
+        case 'F':{
+            BOOL isClicked = [[NSString stringWithFormat:@"%c", fileBytes[1]] boolValue];
+            [self.buttonSwitch setOn:isClicked];
+            if(isClicked){
+                [self setRandomBackground];
+            }
+            break;
+        }
+        case 'E':{
+            NSData *value = [d subdataWithRange:NSMakeRange(1, [d length] - 1)];
+            NSString *s = [[NSString alloc] initWithData:value encoding:NSUTF8StringEncoding];
+            int int_val = [s intValue];
+            if(int_val < 10){
+                [self.potLabel setText:@"0"];
+            }else if(labs(1023 - int_val) < 10){
+                [self.potLabel setText:@"1023"];
+            }else{
+                [self.potLabel setText:s];
+            }
+            self.potValue = int_val;
+            [self setColor];
+            break;
+        }
     }
     
-//    NSString *s = [[NSString alloc] initWithData:d encoding:NSUTF8StringEncoding];
-//    NSLog(@"Received data: %@", s);
-//    self.label.text = s;
+    NSString *s = [[NSString alloc] initWithData:d encoding:NSUTF8StringEncoding];
+    NSLog(@"Received data: %@", s);
 }
 
 - (void) onBLEDidDisconnect: (NSNotification *)notification
@@ -81,6 +118,8 @@ NSTimer *rssiTimer;
     NSLog(@"onBLEDidDisconnect");
     
     [rssiTimer invalidate];
+    
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(void) onBLEDidConnect: (NSNotification *)notification {
@@ -123,19 +162,25 @@ NSTimer *rssiTimer;
 }
 
 #pragma mark - UI operations storyboard
-- (IBAction)sendText:(id)sender {
-    NSLog(@"sendText");
+- (IBAction)ledChanged:(id)sender {
+    NSLog(@"ledChanged");
     
-    NSString *s;
-    NSData *d;
+    NSMutableData *d = [[NSMutableData alloc] init];
+    [d appendBytes:"B" length:1];
+    BOOL state = [(UISwitch* )sender isOn];
+    [d appendBytes:&state length:1];
     
-    if (self.textField.text.length > 16)
-        s = [self.textField.text substringToIndex:16];
-    else
-        s = self.textField.text;
+    [self.bleShield write:d];
+}
+- (IBAction)servoChanged:(id)sender {
+    NSLog(@"servoChanged");
     
-    s = [NSString stringWithFormat:@"%@\r\n", s];
-    d = [s dataUsingEncoding:NSUTF8StringEncoding];
+    int int_value = (int) [(UISlider* )sender value];
+    NSMutableData *d = [[NSMutableData alloc] init];
+    [d appendBytes:"D" length:1];
+    [d appendBytes:&int_value length:sizeof(int_value)];
+//    NSLog(@"Integer: %i", int_value);
+    
     
     [self.bleShield write:d];
 }

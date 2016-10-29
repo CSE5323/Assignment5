@@ -32,7 +32,19 @@
     
     self.refreshControl = refreshControl;
     
-    [self scanForDevices];
+    //Initial
+    [NSTimer scheduledTimerWithTimeInterval:(float)1
+                                     target:self
+                                   selector:@selector(scanForDevices)
+                                   userInfo:nil
+                                    repeats:NO];
+    
+    //Every 10 seconds
+//    [NSTimer scheduledTimerWithTimeInterval:(float)10
+//                                     target:self
+//                                   selector:@selector(scanForDevices)
+//                                   userInfo:nil
+//                                    repeats:YES];
 
 }
 
@@ -84,7 +96,6 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"BLECell" forIndexPath:indexPath];
     
-    
     CBPeripheral* aPeripheral = [self.bleShield.peripherals objectAtIndex:indexPath.row];
     
     // Configure the cell...
@@ -101,9 +112,7 @@
     NSLog(@"Attemp to connect to peripherals %ld", (long)indexPath.row);
     CBPeripheral *aPeripheral = [self.bleShield.peripherals objectAtIndex:indexPath.row];
     
-    //CHANGE 6: add code here to connect to the selected peripheral (aPeripheral)
     [self.bleShield connectPeripheral:aPeripheral];
-    
     
 }
 
